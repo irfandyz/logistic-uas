@@ -40,26 +40,28 @@ class LogisticSeeder extends Seeder
                 'shipping_id' => Shipping::inRandomOrder()->first()->id,
                 'date' => now(),
             ]);
+        }
+        $id = [];
+        for ($j = 0; $j < 5; $j++) {
+            $item = Item::whereNotIn('id', $id)->inRandomOrder()->first();
+            $id[] = $item->id;
+            $quantity = rand(10, 20);
+            $incomingDetail = IncomingItemDetail::create([
+                'incoming_item_id' => IncomingItem::inRandomOrder()->first()->id,
+                'item_id' => $item->id,
+                'quantity' => $quantity,
+                'price' => [10000, 20000, 30000, 40000, 50000][$j],
+            ]);
 
-            for ($j = 0; $j < 5; $j++) {
-                $quantity = rand(10, 20);
-                $incomingDetail = IncomingItemDetail::create([
-                    'incoming_item_id' => $incoming->id,
-                    'item_id' => $item->id,
-                    'quantity' => $quantity,
-                    'price' => [10000, 20000, 30000, 40000, 50000][$j],
-                ]);
+            $outgoingDetail = OutgoingItemDetail::create([
+                'outgoing_item_id' => OutgoingItem::inRandomOrder()->first()->id,
+                'item_id' => $item->id,
+                'quantity' => $quantity - 5,
+                'price' => [10000, 20000, 30000, 40000, 50000][$j],
+            ]);
 
-                $outgoingDetail = OutgoingItemDetail::create([
-                    'outgoing_item_id' => $outgoing->id,
-                    'item_id' => $item->id,
-                    'quantity' => $quantity - 5,
-                    'price' => [10000, 20000, 30000, 40000, 50000][$j],
-                ]);
-
-                $item->quantity += $quantity;
-                $item->save();
-            }
+            $item->quantity += $quantity;
+            $item->save();
         }
     }
 }
